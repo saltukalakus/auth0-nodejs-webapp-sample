@@ -39,9 +39,9 @@ router.get('/callbackstateless', function (req, res, next) {
     if (err) { return next(err); }
     if (!user) { return res.redirect('/login'); }
     
-    // Return to /login endpoint if the connection isn't the one configured for 
+    // Return to /logout endpoint if the connection isn't the one configured for 
     // stateless. In this sample I have a SAML test connection with name TestSAML
-    if (user.id.indexOf("samlp|TestSAML") < 0 ) { return res.redirect('/login'); }
+    if (user.id.indexOf("samlp|TestSAML") < 0 ) { return res.redirect('/logout'); }
 
     req.logIn(user, function (err) {
       if (err) { return next(err); }
