@@ -17,9 +17,10 @@ router.get('/login', passport.authenticate('auth0', {
 
 // Perform the final stage of authentication and redirect to previously requested URL or '/user'
 router.get('/callback', function (req, res, next) {
-  passport.authenticate('auth0', function (err, user, info) {
+  passport.authenticate('auth0',function (err, user, info) {
     if (err) { return next(err); }
     if (!user) { return res.redirect('/login'); }
+   
     req.logIn(user, function (err) {
       if (err) { return next(err); }
       const returnTo = req.session.returnTo;
@@ -28,6 +29,29 @@ router.get('/callback', function (req, res, next) {
     });
   })(req, res, next);
 });
+
+// Perform the final stage of authentication and redirect to previously requested URL or '/user'
+router.get('/callbackstateless', function (req, res, next) {
+  req.session.authParams = {
+    scope: 'openid email profile'
+    };
+  passport.authenticate('auth0Stateless',function (err, user, info) {
+    if (err) { return next(err); }
+    if (!user) { return res.redirect('/login'); }
+    
+    // Return to /login endpoint if the connection isn't the one configured for 
+    // stateless. In this sample I have a SAML test connection with name TestSAML
+    if (user.id.indexOf("samlp|TestSAML") < 0 ) { return res.redirect('/login'); }
+
+    req.logIn(user, function (err) {
+      if (err) { return next(err); }
+      const returnTo = req.session.returnTo;
+      delete req.session.returnTo;
+      res.redirect(returnTo || '/user');
+    });
+  })(req, res, next);
+});
+
 
 // Perform session logout and redirect to homepage
 router.get('/logout', (req, res) => {
